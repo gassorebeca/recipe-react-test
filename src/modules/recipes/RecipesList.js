@@ -15,7 +15,6 @@ const Recipes = () => {
   const [selectedRecipes, setSelectedRecipes] = useState(0);
 
   const { data, loading } = useFetchHelloFreshBox();
-  console.log(recipes);
   const {headline, baseRecipePrice, min, max, shippingPrice} = data;
   const minRecipesSelected = selectedRecipes < min  ? false : true;
   const maxRecipesSelected = selectedRecipes === max ? true : false;
@@ -26,8 +25,6 @@ const Recipes = () => {
     setSelectedRecipes(selectedRecipes + 1);
     setTotalPrice(totalPrice + baseRecipePrice)
     setSelected(selected + 1);
-
-    console.log(recipes);
   };
 
   const handleRemoveRecipe = (id) => {
