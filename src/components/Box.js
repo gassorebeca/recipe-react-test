@@ -9,6 +9,9 @@ import {
   shadow,
   space,
   textAlign,
+  lineHeight,
+  fontWeight,
+  fontSize,
 } from 'styled-system';
 
 const Box = styled.div`
@@ -21,6 +24,9 @@ const Box = styled.div`
   ${shadow}
   ${space}
   ${textAlign}
+  ${lineHeight}
+  ${fontWeight}
+  ${fontSize}
 `;
 
 Box.displayName = 'Box';
