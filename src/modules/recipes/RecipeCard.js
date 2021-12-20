@@ -16,13 +16,13 @@ const isButtonDisable = (selectionLimit, maxRecipesSelected) => {
 };
 
 const onClickAdd = (handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price) => {
-  handleAddRecipe({recipeId, name, price})
   setSelectedRecipe(selectedRecipe + 1)
+  handleAddRecipe({recipeId, name, price, selectedRecipe})
 }
 
-const onClickRemove = (handleRemoveRecipe, setSelectedRecipe, selectedRecipe, recipeId) => {
-  handleRemoveRecipe(recipeId)
+const onClickRemove = (handleRemoveRecipe, setSelectedRecipe, selectedRecipe, name) => {
   setSelectedRecipe(selectedRecipe - 1)
+  handleRemoveRecipe(name, selectedRecipe)
 }
 
 const RecipeCard = ({
@@ -107,7 +107,6 @@ RecipeCard.propTypes = {
   yields: PropTypes.number,
 };
 
-
 const UnselectedRecipeFooter = ({
   isExtra,
   name,
@@ -136,9 +135,6 @@ const UnselectedRecipeFooter = ({
   </Flex>
 );
 
-
-
-
 UnselectedRecipeFooter.propTypes = {
   isExtra: PropTypes.bool,
   price: PropTypes.number,
@@ -162,7 +158,9 @@ const SelectedRecipeFooter = ({
   selectedRecipe
 }) => (
   <Flex backgroundColor="primary_600" justifyContent="space-between" alignItems="center">
-    <SelectionButton onClick={() => onClickRemove(handleRemoveRecipe, setSelectedRecipe, selectedRecipe, recipeId)} title="Decrease quantity">
+    <SelectionButton
+      onClick={() => onClickRemove(handleRemoveRecipe, setSelectedRecipe, selectedRecipe, name)}
+      title="Decrease quantity">
       <IconMinusCircle />
     </SelectionButton>
     <Box color="white">
@@ -173,7 +171,10 @@ const SelectedRecipeFooter = ({
         ({selectedRecipe * yields} servings)
       </Text>
     </Box>
-    <SelectionButton onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price)} title="Increase quantity" disabled={isButtonDisable(selectionLimit, maxRecipesSelected)}>
+    <SelectionButton
+      onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price)}
+      title="Increase quantity"
+      disabled={isButtonDisable(selectionLimit, maxRecipesSelected)}>
       <IconPlusCircle />
     </SelectionButton>
   </Flex>

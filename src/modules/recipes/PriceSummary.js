@@ -3,14 +3,14 @@ import Box from '../../components/Box';
 import { Row, Col } from '../../components/Grid';
 import { parseRawPrice } from './price';
 
-const PriceSummary = ({ summary, totalPrice, shippingPrice, baseRecipePrice }) => {
-  return (
+const PriceSummary = ({ summary, totalPrice, shippingPrice, baseRecipePrice, duplicatedRecipe }) => {
+  return ( //TODO: trocar a logica e controlar o summary pelo recipeCard?
     <Box width={['290px', '450px']} padding={"16px"}  fontSize={"16px"} lineHeight={"27px"} >
       {summary.length !== 0 ? summary.map((recipe) => (
         <Box key={recipe.id} fontWeight={400} paddingBottom={"8px"}>
           <Row>
             <Col sm={10}>
-              {recipe.name}
+              {recipe.name} x {duplicatedRecipe && duplicatedRecipe}
             </Col>
             <Col sm={2}>
               {parseRawPrice(baseRecipePrice)}

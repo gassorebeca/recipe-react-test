@@ -12,25 +12,30 @@ const Recipes = () => {
   const [summary, setSummary] = useState([]);
   const [selected, setSelected] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [selectedRecipes, setSelectedRecipes] = useState(0);
+  const [recipesInTheBox, setRecipesInTheBox] = useState(0);
+  const [duplicatedRecipe, setDuplicatedRecipe] = useState(1);
 
   const { data, loading } = useFetchHelloFreshBox();
   const {headline, baseRecipePrice, min, max, shippingPrice} = data;
-  const minRecipesSelected = selectedRecipes < min  ? false : true;
-  const maxRecipesSelected = selectedRecipes === max ? true : false;
-  const totalPriceWithShipping = parseRawPrice(selectedRecipes > 0 ? totalPrice + shippingPrice : 0);
+  const minRecipesSelected = recipesInTheBox < min  ? false : true;
+  const maxRecipesSelected = recipesInTheBox === max ? true : false;
+  const totalPriceWithShipping = parseRawPrice(recipesInTheBox > 0 ? totalPrice + shippingPrice : 0);
 
   const handleAddRecipe = (props) => {
-    setSummary(summary => [...summary, props] );
-    setSelectedRecipes(selectedRecipes + 1);
+    if(summary.find(p => p.name === props.name)) setDuplicatedRecipe(props.selectedRecipe + 1)
+    else setSummary(summary => [...summary, props] );
+
+    setRecipesInTheBox(recipesInTheBox + 1);
     setTotalPrice(totalPrice + baseRecipePrice)
     setSelected(selected + 1);
   };
 
-  const handleRemoveRecipe = (id) => {
-    setSummary(summary => summary.splice(id, 1));
+  const handleRemoveRecipe = (name, selectedRecipe) => {
+    if(summary.find(p => p.name === name)) setDuplicatedRecipe(selectedRecipe - 1)
+    else setSummary(summary => summary.splice(name, 1));
+
     setTotalPrice(totalPrice - baseRecipePrice)
-    setSelectedRecipes(selectedRecipes - 1);
+    setRecipesInTheBox(recipesInTheBox - 1);
   };
 
   React.useEffect(() => {
@@ -56,7 +61,12 @@ const Recipes = () => {
             <Box textAlign="right" mr="xs">
               <h3>{totalPriceWithShipping}</h3>
             </Box>
-            <PriceInfo summary={summary} totalPrice={totalPrice} shippingPrice={shippingPrice} baseRecipePrice={baseRecipePrice}/>
+            <PriceInfo
+              summary={summary}
+              totalPrice={totalPrice}
+              shippingPrice={shippingPrice}
+              baseRecipePrice={baseRecipePrice}
+              duplicatedRecipe={duplicatedRecipe} />
           </Flex>
         </Col>
       </Row>
