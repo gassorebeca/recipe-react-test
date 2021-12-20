@@ -1,5 +1,4 @@
-import React from 'react';
-
+import React, { useState } from 'react';
 import { Row, Col } from '../../components/Grid';
 import Flex from '../../components/Flex';
 import Box from '../../components/Box';
@@ -9,21 +8,33 @@ import { parseRawPrice } from './price';
 import useFetchHelloFreshBox from '../../hooks/useFetchHelloFreshBox';
 
 const Recipes = () => {
-  // This state stores the array of recipes with the changes performed by the customer.
-  const [recipes, setRecipes] = React.useState([]);
+  const [recipes, setRecipes] = useState([]);
+  const [summary, setSummary] = useState([]);
+  const [selected, setSelected] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [selectedRecipes, setSelectedRecipes] = useState(0);
+
   const { data, loading } = useFetchHelloFreshBox();
+  console.log(recipes);
+  const {headline, baseRecipePrice, min, max, shippingPrice} = data;
+  const minRecipesSelected = selectedRecipes < min  ? false : true;
+  const maxRecipesSelected = selectedRecipes === max ? true : false;
+  const totalPriceWithShipping = parseRawPrice(selectedRecipes > 0 ? totalPrice + shippingPrice : 0);
 
-  // add/remove recipe, feel free to remove or rename these these variables and values.
-  const handleAddRecipe = () => null;
-  const handleRemoveRecipe = () => null;
+  const handleAddRecipe = (props) => {
+    setSummary(summary => [...summary, props] );
+    setSelectedRecipes(selectedRecipes + 1);
+    setTotalPrice(totalPrice + baseRecipePrice)
+    setSelected(selected + 1);
 
-  // min/max recipe boundaries, feel free to remove or rename these variables and values.
-  const minRecipesSelected = false;
-  const maxRecipesSelected = false;
+    console.log(recipes);
+  };
 
-  // price summary and total price, feel free to remove or rename these variables and values.
-  const summary = [];
-  const totalPrice = parseRawPrice(0);
+  const handleRemoveRecipe = (id) => {
+    setSummary(summary => summary.splice(id, 1));
+    setTotalPrice(totalPrice - baseRecipePrice)
+    setSelectedRecipes(selectedRecipes - 1);
+  };
 
   React.useEffect(() => {
     const { recipes: fetchedRecipes } = data;
@@ -41,14 +52,14 @@ const Recipes = () => {
     <>
       <Row>
         <Col sm={6}>
-          <h3>{data.headline}</h3>
+          <h3>{headline}</h3>
         </Col>
         <Col sm={6}>
           <Flex alignItems="center" justifyContent="flex-end">
             <Box textAlign="right" mr="xs">
-              <h3>{totalPrice}</h3>
+              <h3>{totalPriceWithShipping}</h3>
             </Box>
-            <PriceInfo summary={summary} totalPrice={totalPrice} />
+            <PriceInfo summary={summary} totalPrice={totalPrice} shippingPrice={shippingPrice} baseRecipePrice={baseRecipePrice}/>
           </Flex>
         </Col>
       </Row>
@@ -59,6 +70,8 @@ const Recipes = () => {
             <Box mb="md">
               <RecipeCard
                 {...recipe}
+                selectionLimit={7}
+                selected={selected}
                 handleAddRecipe={handleAddRecipe}
                 handleRemoveRecipe={handleRemoveRecipe}
                 minRecipesSelected={minRecipesSelected}

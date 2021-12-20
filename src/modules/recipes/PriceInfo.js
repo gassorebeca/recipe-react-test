@@ -6,7 +6,7 @@ import Tooltip, { TooltipContainer } from '../../components/Tooltip';
 import PriceSummary from './PriceSummary';
 import useOnClickOutside from '../../hooks/useOnClickOutside';
 
-const PriceInfo = ({ summary, totalPrice }) => {
+const PriceInfo = ({ summary, totalPrice, shippingPrice, baseRecipePrice }) => {
   const ref = React.useRef();
   const [isTooltipOpen, setTooltipOpen] = React.useState(false);
   // Close on click outside of the tooltip
@@ -19,7 +19,7 @@ const PriceInfo = ({ summary, totalPrice }) => {
       </IconButton>
       {isTooltipOpen ? (
         <Tooltip>
-          <PriceSummary summary={summary} totalPrice={totalPrice} />
+          <PriceSummary summary={summary} totalPrice={totalPrice} shippingPrice={shippingPrice} baseRecipePrice={baseRecipePrice}/>
         </Tooltip>
       ) : null}
     </TooltipContainer>

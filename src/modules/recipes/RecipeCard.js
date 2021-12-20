@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import css from '@styled-system/css';
@@ -10,6 +10,20 @@ import Button from '../../components/Button';
 import IconMinusCircle from '../../icons/IconMinusCircle';
 import IconPlusCircle from '../../icons/IconPlusCircle';
 import { parseRawPrice } from './price';
+
+const isButtonDisable = (selectionLimit, maxRecipesSelected) => {
+  return maxRecipesSelected ? true : false
+};
+
+const onClickAdd = (handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price) => {
+  handleAddRecipe({recipeId, name, price})
+  setSelectedRecipe(selectedRecipe + 1)
+}
+
+const onClickRemove = (handleRemoveRecipe, setSelectedRecipe, selectedRecipe, recipeId) => {
+  handleRemoveRecipe(recipeId)
+  setSelectedRecipe(selectedRecipe - 1)
+}
 
 const RecipeCard = ({
   extraCharge,
@@ -24,49 +38,59 @@ const RecipeCard = ({
   selected,
   selectionLimit,
   yields,
-}) => (
-  <Box
-    borderWidth={selected ? 'md' : null}
-    borderStyle={selected ? 'solid' : null}
-    borderColor={selected ? 'primary_600' : null}
-    m={selected ? '-2px' : null}
-    borderRadius="md"
-    boxShadow="lg">
-    <Box borderRadius="2px 2px 0px 0px" paddingBottom="56.25%" overflow="hidden" height="0">
-      <img src={image} alt={name} width="100%" />
-    </Box>
+}) => {
+  const [selectedRecipe, setSelectedRecipe] = useState(selected);
 
-    <Box p="xs" height="120px">
-      <Text fontWeight="bold" fontFamily="primary" fontSize="md">
-        {name}
-      </Text>
-      <Text fontWeight="regular" fontFamily="secondary" fontSize="sm">
-        {headline}
-      </Text>
+  return (
+    <Box
+      borderWidth={selected ? 'md' : null}
+      borderStyle={selected ? 'solid' : null}
+      borderColor={selected ? 'primary_600' : null}
+      m={selected ? '-2px' : null}
+      borderRadius="md"
+      boxShadow="lg">
+      <Box borderRadius="2px 2px 0px 0px" paddingBottom="56.25%" overflow="hidden" height="0">
+        <img src={image} alt={name} width="100%" />
+      </Box>
+
+      <Box p="xs" height="120px">
+        <Text fontWeight="bold" fontFamily="primary" fontSize="md">
+          {name}
+        </Text>
+        <Text fontWeight="regular" fontFamily="secondary" fontSize="sm">
+          {headline}
+        </Text>
+      </Box>
+      {selectedRecipe ? (
+        <SelectedRecipeFooter
+          recipeId={id}
+          setSelectedRecipe={setSelectedRecipe}
+          selectedRecipe={selectedRecipe}
+          name={name}
+          yields={yields}
+          selected={selected}
+          selectionLimit={selectionLimit}
+          maxRecipesSelected={maxRecipesSelected}
+          handleAddRecipe={handleAddRecipe}
+          handleRemoveRecipe={handleRemoveRecipe}
+        />
+      ) : (
+        <UnselectedRecipeFooter
+          recipeId={id}
+          setSelectedRecipe={setSelectedRecipe}
+          selectedRecipe={selectedRecipe}
+          name={name}
+          price={extraCharge && extraCharge}
+          selected={selected}
+          minRecipesSelected={minRecipesSelected}
+          maxRecipesSelected={maxRecipesSelected}
+          handleAddRecipe={handleAddRecipe}
+          handleRemoveRecipe={handleRemoveRecipe}
+        />
+      )}
     </Box>
-    {selected ? (
-      <SelectedRecipeFooter
-        recipeId={id}
-        yields={yields}
-        selected={selected}
-        selectionLimit={selectionLimit}
-        maxRecipesSelected={maxRecipesSelected}
-        handleAddRecipe={handleAddRecipe}
-        handleRemoveRecipe={handleRemoveRecipe}
-      />
-    ) : (
-      <UnselectedRecipeFooter
-        recipeId={id}
-        price={extraCharge && extraCharge}
-        selected={selected}
-        minRecipesSelected={minRecipesSelected}
-        maxRecipesSelected={maxRecipesSelected}
-        handleAddRecipe={handleAddRecipe}
-        handleRemoveRecipe={handleRemoveRecipe}
-      />
-    )}
-  </Box>
-);
+  );
+};
 
 RecipeCard.propTypes = {
   extraCharge: PropTypes.number,
@@ -83,13 +107,17 @@ RecipeCard.propTypes = {
   yields: PropTypes.number,
 };
 
+
 const UnselectedRecipeFooter = ({
   isExtra,
+  name,
   price,
   recipeId,
   minRecipesSelected,
   maxRecipesSelected,
   handleAddRecipe,
+  setSelectedRecipe,
+  selectedRecipe
 }) => (
   <Flex p="xs">
     <Box flex="50%" alignSelf="center">
@@ -97,16 +125,19 @@ const UnselectedRecipeFooter = ({
     </Box>
     <Box flex="50%">
       <Button
-        onClick={() => handleAddRecipe()}
+        onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price)}
         variant="secondary"
         width="100%"
         p="0"
-        disabled={false}>
+        disabled={maxRecipesSelected ? true : false}>
         {false ? 'Add extra meal' : 'Add'}
       </Button>
     </Box>
   </Flex>
 );
+
+
+
 
 UnselectedRecipeFooter.propTypes = {
   isExtra: PropTypes.bool,
@@ -119,26 +150,30 @@ UnselectedRecipeFooter.propTypes = {
 
 const SelectedRecipeFooter = ({
   recipeId,
+  name,
   selected,
   selectionLimit,
   yields,
   maxRecipesSelected,
   handleAddRecipe,
   handleRemoveRecipe,
+  price,
+  setSelectedRecipe,
+  selectedRecipe
 }) => (
   <Flex backgroundColor="primary_600" justifyContent="space-between" alignItems="center">
-    <SelectionButton onClick={() => handleRemoveRecipe()} title="Decrease quantity">
+    <SelectionButton onClick={() => onClickRemove(handleRemoveRecipe, setSelectedRecipe, selectedRecipe, recipeId)} title="Decrease quantity">
       <IconMinusCircle />
     </SelectionButton>
     <Box color="white">
       <Text textAlign="center" fontWeight="bold" fontFamily="secondary" fontSize="md">
-        {selected} in your box
+        {selectedRecipe} in your box
       </Text>
       <Text textAlign="center" fontFamily="secondary" fontSize="sm">
-        ({selected * yields} servings)
+        ({selectedRecipe * yields} servings)
       </Text>
     </Box>
-    <SelectionButton onClick={() => handleAddRecipe()} title="Increase quantity" disabled={false}>
+    <SelectionButton onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price)} title="Increase quantity" disabled={isButtonDisable(selectionLimit, maxRecipesSelected)}>
       <IconPlusCircle />
     </SelectionButton>
   </Flex>
