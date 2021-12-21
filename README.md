@@ -27,7 +27,7 @@ Launches the test runner in the interactive watch mode.\
 
 ##TODO
 - [ ] Add individual price calculation to summary box
-
+- [ ] Recipes and PriceInfo tests
 
 ## Author
 
