@@ -71,8 +71,6 @@ const RecipeCard = ({
 }) => {
   const [selectedRecipe, setSelectedRecipe] = useState(0);
   const [isRecipeDuplicated, setIsRecipeDuplicated] = useState(false);
-  console.log("extraCharge",extraCharge);
-  console.log("price",price);
   return (
     <Box
       borderWidth={selected ? 'md' : null}

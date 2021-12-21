@@ -50,7 +50,6 @@ const Recipes = () => {
           ? {...item, ...summaryItem}
           : item
       ))
-    console.log("summaryItem",summaryItem);
 
     // decrease number of recipesInTheBox and totalPrice
     setRecipesInTheBox(recipesInTheBox - 1);
