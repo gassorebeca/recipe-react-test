@@ -42,12 +42,26 @@ const Recipes = () => {
     setTotalPrice(totalPrice + baseRecipePrice)
   };
 
-  const handleRemoveRecipe = (recipeId) => {
-    // if recipeId is passed, remove the recipe from summary box
-    if(recipeId)
-      setSummary(summary => summary.splice(recipeId, 1));
+  const handleRemoveDuplicatedRecipe = (summaryItem) => {
+    // search in summary array for duplicated recipeId and decrease it with updated summaryItem name and price
+    setSummary(
+      summary.map(item =>
+        item.recipeId === summaryItem.recipeId
+          ? {...item, ...summaryItem}
+          : item
+      ))
+    console.log("summaryItem",summaryItem);
 
-    // else remove duplicated recipe price and decrease recipesInTheBox
+    // decrease number of recipesInTheBox and totalPrice
+    setRecipesInTheBox(recipesInTheBox - 1);
+    setTotalPrice(totalPrice - baseRecipePrice)
+  };
+
+  const handleRemoveRecipe = (recipeId) => {
+    // remove the recipe from summary box
+    setSummary(summary => summary.splice(recipeId, 1));
+
+    // remove duplicated recipe price and decrease recipesInTheBox
     setTotalPrice(totalPrice - baseRecipePrice)
     setRecipesInTheBox(recipesInTheBox - 1);
   };
@@ -97,6 +111,7 @@ const Recipes = () => {
                 handleAddRecipe={handleAddRecipe}
                 handleRemoveRecipe={handleRemoveRecipe}
                 handleUpdateRecipe={handleUpdateRecipe}
+                handleRemoveDuplicatedRecipe={handleRemoveDuplicatedRecipe}
                 minRecipesSelected={minRecipesSelected}
                 maxRecipesSelected={maxRecipesSelected}
               />

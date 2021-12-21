@@ -25,6 +25,10 @@ You will also see any lint errors in the console.
 
 Launches the test runner in the interactive watch mode.\
 
+##TODO
+- [ ] Add individual price calculation to summary box
+
+
 ## Author
 
 - [@rebecagasso](https://www.github.com/rebecagasso)

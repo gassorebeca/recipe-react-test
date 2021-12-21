@@ -20,6 +20,7 @@ const isButtonDisable = (selectionLimit, maxRecipesSelected, selectedRecipe) => 
 };
 
 const summaryItemName = (selectedRecipeCount, name) => {
+  console.log("summaryItemName selectedRecipeCount", selectedRecipeCount);
   return selectedRecipeCount > 1 ? name + " x " + selectedRecipeCount : name;
 }
 
@@ -55,6 +56,7 @@ const RecipeCard = ({
   handleAddRecipe,
   handleRemoveRecipe,
   handleUpdateRecipe,
+  handleRemoveDuplicatedRecipe,
   headline,
   id,
   image,
@@ -103,6 +105,7 @@ const RecipeCard = ({
           handleAddRecipe={handleAddRecipe}
           handleUpdateRecipe={handleUpdateRecipe}
           handleRemoveRecipe={handleRemoveRecipe}
+          handleRemoveDuplicatedRecipe={handleRemoveDuplicatedRecipe}
           isRecipeDuplicated={isRecipeDuplicated}
           setIsRecipeDuplicated={setIsRecipeDuplicated}
           price={price}
@@ -121,6 +124,7 @@ const RecipeCard = ({
           handleAddRecipe={handleAddRecipe}
           handleUpdateRecipe={handleUpdateRecipe}
           handleRemoveRecipe={handleRemoveRecipe}
+          handleRemoveDuplicatedRecipe={handleRemoveDuplicatedRecipe}
           isRecipeDuplicated={isRecipeDuplicated}
           setIsRecipeDuplicated={setIsRecipeDuplicated}
           selectionLimit={selectionLimit}
@@ -135,6 +139,7 @@ RecipeCard.propTypes = {
   handleAddRecipe: PropTypes.func,
   handleRemoveRecipe: PropTypes.func,
   handleUpdateRecipe: PropTypes.func,
+  handleRemoveDuplicatedRecipe: PropTypes.func,
   headline: PropTypes.string,
   id: PropTypes.string,
   image: PropTypes.string,
@@ -204,6 +209,7 @@ const SelectedRecipeFooter = ({
   handleAddRecipe,
   handleUpdateRecipe,
   handleRemoveRecipe,
+  handleRemoveDuplicatedRecipe,
   price,
   setSelectedRecipe,
   selectedRecipe,
@@ -215,22 +221,19 @@ const SelectedRecipeFooter = ({
     setSelectedRecipe(selectedRecipeCount);
     if(selectedRecipe === 1) setIsRecipeDuplicated(false);
 
-    console.log("selectedRecipe",selectedRecipeCount);
     // if selectedRecipeCount is smaller or equal to 1 remove summary with recipeId
-    if(selectedRecipeCount <= 1)
+    if(selectedRecipeCount < 1)
       handleRemoveRecipe(recipeId);
-
-    handleRemoveRecipe();
-    // if recipe is duplicated, update the summary item
-   /* else {
+    else {
+      // if recipe is duplicated, update the summary item
       const updatedSummary = {
         recipeId,
-        name: summaryItemName(selectedRecipe, name),
-        price: summaryItemPrice(price, selectedRecipe, baseRecipePrice)
+        name: summaryItemName(selectedRecipeCount, name),
+        price: summaryItemPrice(price, selectedRecipeCount, baseRecipePrice)
       }
 
-      handleUpdateRecipe(updatedSummary);
-    } */
+      handleRemoveDuplicatedRecipe(updatedSummary);
+    }
   };
 
   return (
@@ -273,6 +276,7 @@ SelectedRecipeFooter.propTypes = {
   handleAddRecipe: PropTypes.func,
   handleUpdateRecipe: PropTypes.func,
   handleRemoveRecipe: PropTypes.func,
+  handleRemoveDuplicatedRecipe: PropTypes.func,
   setSelectedRecipe: PropTypes.func,
   setIsRecipeDuplicated: PropTypes.func,
   isRecipeDuplicated: PropTypes.bool,
