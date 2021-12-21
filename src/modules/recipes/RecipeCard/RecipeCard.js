@@ -25,10 +25,6 @@ const summaryItemName = (selectedRecipeCount, name) => {
 
 // price multiplied by the amount of times this recipe was selected
 const summaryItemPrice = (price, selectedRecipeCount, baseRecipePrice) => {
-  console.log("price", price);
-  console.log("selectedRecipeCount",selectedRecipeCount);
-  console.log("baseRecipePrice",baseRecipePrice);
-
   if(price !== 0) return price * selectedRecipeCount;
 
   return baseRecipePrice * selectedRecipeCount;
@@ -151,7 +147,6 @@ RecipeCard.propTypes = {
 };
 
 const UnselectedRecipeFooter = ({
-  isExtra,
   name,
   slug,
   price,
@@ -184,13 +179,18 @@ const UnselectedRecipeFooter = ({
 );
 
 UnselectedRecipeFooter.propTypes = {
-  isExtra: PropTypes.bool,
-  price: PropTypes.number,
+  name: PropTypes.string,
+  slug: PropTypes.string,
   recipeId: PropTypes.string,
+  price: PropTypes.number,
+  selectedRecipe: PropTypes.number,
+  baseRecipePrice: PropTypes.number,
+  selectionLimit: PropTypes.number,
   minRecipesSelected: PropTypes.bool,
   maxRecipesSelected: PropTypes.bool,
   handleAddRecipe: PropTypes.func,
   handleUpdateRecipe: PropTypes.func,
+  setSelectedRecipe: PropTypes.func,
 };
 
 const SelectedRecipeFooter = ({
@@ -198,7 +198,6 @@ const SelectedRecipeFooter = ({
   baseRecipePrice,
   name,
   slug,
-  selected,
   selectionLimit,
   yields,
   maxRecipesSelected,
@@ -212,11 +211,13 @@ const SelectedRecipeFooter = ({
   isRecipeDuplicated
 }) => {
   const onClickRemove = () => {
-    setSelectedRecipe(selectedRecipe - 1);
+    let selectedRecipeCount = selectedRecipe - 1;
+    setSelectedRecipe(selectedRecipeCount);
     if(selectedRecipe === 1) setIsRecipeDuplicated(false);
 
+    console.log("selectedRecipe",selectedRecipeCount);
     // if selectedRecipeCount is smaller or equal to 1 remove summary with recipeId
-    if(selectedRecipe <= 1)
+    if(selectedRecipeCount <= 1)
       handleRemoveRecipe(recipeId);
 
     handleRemoveRecipe();
@@ -262,13 +263,21 @@ const SelectedRecipeFooter = ({
 
 SelectedRecipeFooter.propTypes = {
   recipeId: PropTypes.string,
-  selected: PropTypes.number,
-  selectionLimit: PropTypes.number,
+  name: PropTypes.string,
+  slug: PropTypes.string,
   yields: PropTypes.number,
-  maxRecipesSelected: PropTypes.bool,
+  price: PropTypes.number,
+  baseRecipePrice: PropTypes.number,
+  selectionLimit: PropTypes.number,
+  selectedRecipe: PropTypes.number,
   handleAddRecipe: PropTypes.func,
   handleUpdateRecipe: PropTypes.func,
   handleRemoveRecipe: PropTypes.func,
+  setSelectedRecipe: PropTypes.func,
+  setIsRecipeDuplicated: PropTypes.func,
+  isRecipeDuplicated: PropTypes.bool,
+  maxRecipesSelected: PropTypes.bool,
+
 };
 
 const SelectionButton = styled.button`
