@@ -12,23 +12,24 @@ import IconPlusCircle from '../../../icons/IconPlusCircle';
 import { parseRawPrice } from '../Price/price';
 
 const isButtonDisable = (selectionLimit, maxRecipesSelected, selectedRecipe) => {
-  // selectedRecipe
+  // number of selectedRecipe id equal ou bigger than selectionLimit
   if(selectedRecipe >= selectionLimit) return true;
 
   // if maxRecipesSelected  is true, the button is disabled
   return maxRecipesSelected ? true : false;
 };
 
+// concat recipe name with number of times it was selected
 const summaryItemName = (selectedRecipeCount, name) => {
-  console.log("summaryItemName selectedRecipeCount", selectedRecipeCount);
   return selectedRecipeCount > 1 ? name + " x " + selectedRecipeCount : name;
 }
 
 // price multiplied by the amount of times this recipe was selected
 const summaryItemPrice = (price, selectedRecipeCount, baseRecipePrice) => {
-  if(price !== 0) return price * selectedRecipeCount;
+  if(price === 0) return (baseRecipePrice * selectedRecipeCount);
 
-  return baseRecipePrice * selectedRecipeCount;
+  const recipesPrice = baseRecipePrice + price;
+  return recipesPrice;
 }
 
 const onClickAdd = (handleAddRecipe, handleUpdateRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice) => {
@@ -70,7 +71,8 @@ const RecipeCard = ({
 }) => {
   const [selectedRecipe, setSelectedRecipe] = useState(0);
   const [isRecipeDuplicated, setIsRecipeDuplicated] = useState(false);
-
+  console.log("extraCharge",extraCharge);
+  console.log("price",price);
   return (
     <Box
       borderWidth={selected ? 'md' : null}
@@ -108,7 +110,7 @@ const RecipeCard = ({
           handleRemoveDuplicatedRecipe={handleRemoveDuplicatedRecipe}
           isRecipeDuplicated={isRecipeDuplicated}
           setIsRecipeDuplicated={setIsRecipeDuplicated}
-          price={price}
+          price={extraCharge && extraCharge}
         />
       ) : (
         <UnselectedRecipeFooter
@@ -281,7 +283,6 @@ SelectedRecipeFooter.propTypes = {
   setIsRecipeDuplicated: PropTypes.func,
   isRecipeDuplicated: PropTypes.bool,
   maxRecipesSelected: PropTypes.bool,
-
 };
 
 const SelectionButton = styled.button`

@@ -6,9 +6,9 @@ import PropTypes from 'prop-types';
 
 const PriceSummary = ({ summary, totalPrice, shippingPrice }) => {
   return (
-    <Box width={['290px', '450px']} padding={"16px"}  fontSize={"16px"} lineHeight={"27px"} >
-      {summary.length !== 0 ? summary.map((recipe) => (
-        <div key={recipe.id}>
+    <Box title={"priceSummary"} width={['290px', '450px']} padding={"16px"}  fontSize={"16px"} lineHeight={"27px"} >
+      {summary.length !== 0 ? summary.map((recipe, index) => (
+        <div key={recipe.id + index}>
           <Box fontWeight={400} paddingBottom={"8px"}>
             <Row>
               <Col sm={10}>{recipe.name}</Col>
