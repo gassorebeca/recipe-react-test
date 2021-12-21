@@ -19,7 +19,6 @@ const Recipes = () => {
   const maxRecipesSelected = recipesInTheBox === max ? true : false;
   const totalPriceWithShipping = parseRawPrice(recipesInTheBox > 0 ? totalPrice + shippingPrice : 0);
 
-
   const handleAddRecipe = (newSummaryItem) => {
     if(newSummaryItem)
       setSummary(summary => [...summary, newSummaryItem] );
@@ -28,8 +27,22 @@ const Recipes = () => {
     setTotalPrice(totalPrice + baseRecipePrice)
   };
 
+  const handleUpdateRecipe = (summaryItem) => {
+    setSummary(
+      summary.map(item =>
+        item.recipeId === summaryItem.recipeId
+          ? {...item, ...summaryItem}
+          : item
+      ))
+
+    setRecipesInTheBox(recipesInTheBox + 1);
+    setTotalPrice(totalPrice + baseRecipePrice)
+  };
+
   const handleRemoveRecipe = (recipeId) => {
-    setSummary(summary => summary.splice(recipeId, 1));
+    if(recipeId)
+      setSummary(summary => summary.splice(recipeId, 1));
+
     setTotalPrice(totalPrice - baseRecipePrice)
     setRecipesInTheBox(recipesInTheBox - 1);
   };
@@ -78,6 +91,7 @@ const Recipes = () => {
                 selected={0}
                 handleAddRecipe={handleAddRecipe}
                 handleRemoveRecipe={handleRemoveRecipe}
+                handleUpdateRecipe={handleUpdateRecipe}
                 minRecipesSelected={minRecipesSelected}
                 maxRecipesSelected={maxRecipesSelected}
               />

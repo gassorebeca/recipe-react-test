@@ -11,40 +11,46 @@ import IconMinusCircle from '../../../icons/IconMinusCircle';
 import IconPlusCircle from '../../../icons/IconPlusCircle';
 import { parseRawPrice } from '../Price/price';
 
-const isButtonDisable = (selectionLimit, maxRecipesSelected) => {
-  // if maxRecipesSelected or  selectionLimit are true, button is disabled
-  //return maxRecipesSelected || selectionLimit ? true : false;
+const isButtonDisable = (selectionLimit, maxRecipesSelected, selectedRecipe) => {
+  // selectedRecipe
+  if(selectedRecipe >= selectionLimit) return true;
+
+  // if maxRecipesSelected  is true, the button is disabled
   return maxRecipesSelected ? true : false;
 };
 
-const onClickAdd = (handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice) => {
+const summaryItemName = (selectedRecipeCount, name) => {
+  return selectedRecipeCount > 1 ? name + " x " + selectedRecipeCount : name;
+}
+
+// price multiplied by the amount of times this recipe was selected
+const summaryItemPrice = (price, selectedRecipeCount, baseRecipePrice) => {
+  console.log("price", price);
+  console.log("selectedRecipeCount",selectedRecipeCount);
+  console.log("baseRecipePrice",baseRecipePrice);
+
+  if(price !== 0) return price * selectedRecipeCount;
+
+  return baseRecipePrice * selectedRecipeCount;
+}
+
+const onClickAdd = (handleAddRecipe, handleUpdateRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice) => {
   // count how many times this recipe was added to the summary box
   let selectedRecipeCount = selectedRecipe + 1;
   setSelectedRecipe(selectedRecipeCount);
 
-  const summaryItemName = () => {
-    return selectedRecipeCount > 1 ? name + " x " + selectedRecipeCount : name;
-  }
-
-  // price multiplied by the amount of times this recipe was selected
-  const summaryItemPrice = () => {
-    if(price !== 0) return price * selectedRecipeCount;
-
-    return baseRecipePrice * selectedRecipeCount;
-  }
-
   // build new summary item to be send to recipesList
   const newSummaryItem = {
     recipeId,
-    name: summaryItemName(),
-    price: summaryItemPrice(),
+    name: summaryItemName(selectedRecipeCount, name),
+    price: summaryItemPrice(price, selectedRecipeCount, baseRecipePrice)
   }
 
   // if selectedRecipeCount is smaller or equal to 1 add new summary
   if(selectedRecipeCount <= 1)
     handleAddRecipe(newSummaryItem);
-
-  handleAddRecipe();
+  // if recipe is already in the summary box, update the summary item
+  else handleUpdateRecipe(newSummaryItem);
 };
 
 const RecipeCard = ({
@@ -52,6 +58,7 @@ const RecipeCard = ({
   baseRecipePrice,
   handleAddRecipe,
   handleRemoveRecipe,
+  handleUpdateRecipe,
   headline,
   id,
   image,
@@ -61,6 +68,7 @@ const RecipeCard = ({
   selected,
   selectionLimit,
   yields,
+  price,
 }) => {
   const [selectedRecipe, setSelectedRecipe] = useState(0);
   const [isRecipeDuplicated, setIsRecipeDuplicated] = useState(false);
@@ -97,9 +105,11 @@ const RecipeCard = ({
           selectionLimit={selectionLimit}
           maxRecipesSelected={maxRecipesSelected}
           handleAddRecipe={handleAddRecipe}
+          handleUpdateRecipe={handleUpdateRecipe}
           handleRemoveRecipe={handleRemoveRecipe}
           isRecipeDuplicated={isRecipeDuplicated}
           setIsRecipeDuplicated={setIsRecipeDuplicated}
+          price={price}
         />
       ) : (
         <UnselectedRecipeFooter
@@ -113,9 +123,11 @@ const RecipeCard = ({
           minRecipesSelected={minRecipesSelected}
           maxRecipesSelected={maxRecipesSelected}
           handleAddRecipe={handleAddRecipe}
+          handleUpdateRecipe={handleUpdateRecipe}
           handleRemoveRecipe={handleRemoveRecipe}
           isRecipeDuplicated={isRecipeDuplicated}
           setIsRecipeDuplicated={setIsRecipeDuplicated}
+          selectionLimit={selectionLimit}
         />
       )}
     </Box>
@@ -126,6 +138,7 @@ RecipeCard.propTypes = {
   extraCharge: PropTypes.number,
   handleAddRecipe: PropTypes.func,
   handleRemoveRecipe: PropTypes.func,
+  handleUpdateRecipe: PropTypes.func,
   headline: PropTypes.string,
   id: PropTypes.string,
   image: PropTypes.string,
@@ -146,9 +159,11 @@ const UnselectedRecipeFooter = ({
   minRecipesSelected,
   maxRecipesSelected,
   handleAddRecipe,
+  handleUpdateRecipe,
   setSelectedRecipe,
   selectedRecipe,
-  baseRecipePrice
+  baseRecipePrice,
+  selectionLimit
 }) => (
   <Flex p="xs">
     <Box flex="50%" alignSelf="center">
@@ -156,12 +171,12 @@ const UnselectedRecipeFooter = ({
     </Box>
     <Box flex="50%">
       <Button
-        onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice)}
+        onClick={() => onClickAdd(handleAddRecipe, handleUpdateRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice)}
         name={slug}
         variant="secondary"
         width="100%"
         p="0"
-        disabled={maxRecipesSelected ? true : false}>
+        disabled={isButtonDisable(selectionLimit, maxRecipesSelected, selectedRecipe)}>
         {minRecipesSelected ? 'Add extra meal' : 'Add'}
       </Button>
     </Box>
@@ -175,6 +190,7 @@ UnselectedRecipeFooter.propTypes = {
   minRecipesSelected: PropTypes.bool,
   maxRecipesSelected: PropTypes.bool,
   handleAddRecipe: PropTypes.func,
+  handleUpdateRecipe: PropTypes.func,
 };
 
 const SelectedRecipeFooter = ({
@@ -187,6 +203,7 @@ const SelectedRecipeFooter = ({
   yields,
   maxRecipesSelected,
   handleAddRecipe,
+  handleUpdateRecipe,
   handleRemoveRecipe,
   price,
   setSelectedRecipe,
@@ -198,7 +215,21 @@ const SelectedRecipeFooter = ({
     setSelectedRecipe(selectedRecipe - 1);
     if(selectedRecipe === 1) setIsRecipeDuplicated(false);
 
-    handleRemoveRecipe(recipeId);
+    // if selectedRecipeCount is smaller or equal to 1 remove summary with recipeId
+    if(selectedRecipe <= 1)
+      handleRemoveRecipe(recipeId);
+
+    handleRemoveRecipe();
+    // if recipe is duplicated, update the summary item
+   /* else {
+      const updatedSummary = {
+        recipeId,
+        name: summaryItemName(selectedRecipe, name),
+        price: summaryItemPrice(price, selectedRecipe, baseRecipePrice)
+      }
+
+      handleUpdateRecipe(updatedSummary);
+    } */
   };
 
   return (
@@ -219,10 +250,10 @@ const SelectedRecipeFooter = ({
         </Text>
       </Box>
       <SelectionButton
-        onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, isRecipeDuplicated, baseRecipePrice)}
+        onClick={() => onClickAdd(handleAddRecipe,handleUpdateRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, isRecipeDuplicated, baseRecipePrice)}
         title="Increase quantity"
         name={slug}
-        disabled={isButtonDisable(selectionLimit, maxRecipesSelected)}>
+        disabled={isButtonDisable(selectionLimit, maxRecipesSelected, selectedRecipe)}>
         <IconPlusCircle />
       </SelectionButton>
     </Flex>
@@ -236,6 +267,7 @@ SelectedRecipeFooter.propTypes = {
   yields: PropTypes.number,
   maxRecipesSelected: PropTypes.bool,
   handleAddRecipe: PropTypes.func,
+  handleUpdateRecipe: PropTypes.func,
   handleRemoveRecipe: PropTypes.func,
 };
 

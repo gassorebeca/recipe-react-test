@@ -3,8 +3,8 @@ import React from 'react';
 import IconButton from '../../../components/IconButton';
 import IconInfoCircle from '../../../icons/IconInfoCircle';
 import Tooltip, { TooltipContainer } from '../../../components/Tooltip';
-import PriceSummary from '../PriceSummary/PriceSummary';
 import useOnClickOutside from '../../../hooks/useOnClickOutside';
+import PriceSummary from '../PriceSummary';
 
 const PriceInfo = ({ summary, totalPrice, shippingPrice, baseRecipePrice }) => {
   const ref = React.useRef();

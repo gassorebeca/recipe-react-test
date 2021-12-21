@@ -18,7 +18,7 @@ export default {
       image:
         'https://img.hellofresh.com/c_fill,f_auto,fl_lossy,h_405,q_auto,w_720/hellofresh_s3/image/5f4d4a7e62fb0224951e7ec4-2fe03fc2.jpg',
       selected: 1,
-      selectionLimit: 1,
+      selectionLimit: 3,
       extraCharge: 0,
       yields: 2,
     },

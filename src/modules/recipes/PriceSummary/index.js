@@ -27,8 +27,7 @@ const PriceSummary = ({ summary, totalPrice, shippingPrice }) => {
           </Col>
         </Row>
       </Box>
-      <Box borderTop={"solid 1px #E4E4E4"} paddingBottom={"8px"}>
-      </Box>
+      <Box borderTopWidth="sm" borderTopColor="border" borderTopStyle="solid" paddingBottom={"8px"}/>
       <Box fontWeight={600}>
         <Row>
           <Col sm={10}>Total</Col>
