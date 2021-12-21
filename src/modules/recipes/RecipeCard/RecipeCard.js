@@ -3,30 +3,53 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import css from '@styled-system/css';
 
-import Flex from '../../components/Flex';
-import Box from '../../components/Box';
-import Text from '../../components/Text';
-import Button from '../../components/Button';
-import IconMinusCircle from '../../icons/IconMinusCircle';
-import IconPlusCircle from '../../icons/IconPlusCircle';
-import { parseRawPrice } from './price';
+import Flex from '../../../components/Flex';
+import Box from '../../../components/Box';
+import Text from '../../../components/Text';
+import Button from '../../../components/Button';
+import IconMinusCircle from '../../../icons/IconMinusCircle';
+import IconPlusCircle from '../../../icons/IconPlusCircle';
+import { parseRawPrice } from '../Price/price';
 
 const isButtonDisable = (selectionLimit, maxRecipesSelected) => {
-  return maxRecipesSelected ? true : false
+  // if maxRecipesSelected or  selectionLimit are true, button is disabled
+  //return maxRecipesSelected || selectionLimit ? true : false;
+  return maxRecipesSelected ? true : false;
 };
 
-const onClickAdd = (handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price) => {
-  setSelectedRecipe(selectedRecipe + 1)
-  handleAddRecipe({recipeId, name, price, selectedRecipe})
-}
+const onClickAdd = (handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice) => {
+  // count how many times this recipe was added to the summary box
+  let selectedRecipeCount = selectedRecipe + 1;
+  setSelectedRecipe(selectedRecipeCount);
 
-const onClickRemove = (handleRemoveRecipe, setSelectedRecipe, selectedRecipe, name) => {
-  setSelectedRecipe(selectedRecipe - 1)
-  handleRemoveRecipe(name, selectedRecipe)
-}
+  const summaryItemName = () => {
+    return selectedRecipeCount > 1 ? name + " x " + selectedRecipeCount : name;
+  }
+
+  // price multiplied by the amount of times this recipe was selected
+  const summaryItemPrice = () => {
+    if(price !== 0) return price * selectedRecipeCount;
+
+    return baseRecipePrice * selectedRecipeCount;
+  }
+
+  // build new summary item to be send to recipesList
+  const newSummaryItem = {
+    recipeId,
+    name: summaryItemName(),
+    price: summaryItemPrice(),
+  }
+
+  // if selectedRecipeCount is smaller or equal to 1 add new summary
+  if(selectedRecipeCount <= 1)
+    handleAddRecipe(newSummaryItem);
+
+  handleAddRecipe();
+};
 
 const RecipeCard = ({
   extraCharge,
+  baseRecipePrice,
   handleAddRecipe,
   handleRemoveRecipe,
   headline,
@@ -39,7 +62,8 @@ const RecipeCard = ({
   selectionLimit,
   yields,
 }) => {
-  const [selectedRecipe, setSelectedRecipe] = useState(selected);
+  const [selectedRecipe, setSelectedRecipe] = useState(0);
+  const [isRecipeDuplicated, setIsRecipeDuplicated] = useState(false);
 
   return (
     <Box
@@ -64,6 +88,7 @@ const RecipeCard = ({
       {selectedRecipe ? (
         <SelectedRecipeFooter
           recipeId={id}
+          baseRecipePrice={baseRecipePrice}
           setSelectedRecipe={setSelectedRecipe}
           selectedRecipe={selectedRecipe}
           name={name}
@@ -73,10 +98,13 @@ const RecipeCard = ({
           maxRecipesSelected={maxRecipesSelected}
           handleAddRecipe={handleAddRecipe}
           handleRemoveRecipe={handleRemoveRecipe}
+          isRecipeDuplicated={isRecipeDuplicated}
+          setIsRecipeDuplicated={setIsRecipeDuplicated}
         />
       ) : (
         <UnselectedRecipeFooter
           recipeId={id}
+          baseRecipePrice={baseRecipePrice}
           setSelectedRecipe={setSelectedRecipe}
           selectedRecipe={selectedRecipe}
           name={name}
@@ -86,6 +114,8 @@ const RecipeCard = ({
           maxRecipesSelected={maxRecipesSelected}
           handleAddRecipe={handleAddRecipe}
           handleRemoveRecipe={handleRemoveRecipe}
+          isRecipeDuplicated={isRecipeDuplicated}
+          setIsRecipeDuplicated={setIsRecipeDuplicated}
         />
       )}
     </Box>
@@ -110,13 +140,15 @@ RecipeCard.propTypes = {
 const UnselectedRecipeFooter = ({
   isExtra,
   name,
+  slug,
   price,
   recipeId,
   minRecipesSelected,
   maxRecipesSelected,
   handleAddRecipe,
   setSelectedRecipe,
-  selectedRecipe
+  selectedRecipe,
+  baseRecipePrice
 }) => (
   <Flex p="xs">
     <Box flex="50%" alignSelf="center">
@@ -124,12 +156,13 @@ const UnselectedRecipeFooter = ({
     </Box>
     <Box flex="50%">
       <Button
-        onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price)}
+        onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, baseRecipePrice)}
+        name={slug}
         variant="secondary"
         width="100%"
         p="0"
         disabled={maxRecipesSelected ? true : false}>
-        {false ? 'Add extra meal' : 'Add'}
+        {minRecipesSelected ? 'Add extra meal' : 'Add'}
       </Button>
     </Box>
   </Flex>
@@ -146,7 +179,9 @@ UnselectedRecipeFooter.propTypes = {
 
 const SelectedRecipeFooter = ({
   recipeId,
+  baseRecipePrice,
   name,
+  slug,
   selected,
   selectionLimit,
   yields,
@@ -155,30 +190,44 @@ const SelectedRecipeFooter = ({
   handleRemoveRecipe,
   price,
   setSelectedRecipe,
-  selectedRecipe
-}) => (
-  <Flex backgroundColor="primary_600" justifyContent="space-between" alignItems="center">
-    <SelectionButton
-      onClick={() => onClickRemove(handleRemoveRecipe, setSelectedRecipe, selectedRecipe, name)}
-      title="Decrease quantity">
-      <IconMinusCircle />
-    </SelectionButton>
-    <Box color="white">
-      <Text textAlign="center" fontWeight="bold" fontFamily="secondary" fontSize="md">
-        {selectedRecipe} in your box
-      </Text>
-      <Text textAlign="center" fontFamily="secondary" fontSize="sm">
-        ({selectedRecipe * yields} servings)
-      </Text>
-    </Box>
-    <SelectionButton
-      onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price)}
-      title="Increase quantity"
-      disabled={isButtonDisable(selectionLimit, maxRecipesSelected)}>
-      <IconPlusCircle />
-    </SelectionButton>
-  </Flex>
-);
+  selectedRecipe,
+  setIsRecipeDuplicated,
+  isRecipeDuplicated
+}) => {
+  const onClickRemove = () => {
+    setSelectedRecipe(selectedRecipe - 1);
+    if(selectedRecipe === 1) setIsRecipeDuplicated(false);
+
+    handleRemoveRecipe(recipeId);
+  };
+
+  return (
+    <Flex backgroundColor="primary_600" justifyContent="space-between" alignItems="center">
+      <SelectionButton
+        id={slug}
+        onClick={onClickRemove}
+        title="Decrease quantity"
+      >
+        <IconMinusCircle />
+      </SelectionButton>
+      <Box color="white">
+        <Text textAlign="center" fontWeight="bold" fontFamily="secondary" fontSize="md">
+          {selectedRecipe} in your box
+        </Text>
+        <Text textAlign="center" fontFamily="secondary" fontSize="sm">
+          ({selectedRecipe * yields} servings)
+        </Text>
+      </Box>
+      <SelectionButton
+        onClick={() => onClickAdd(handleAddRecipe, setSelectedRecipe, selectedRecipe, recipeId, name, price, isRecipeDuplicated, baseRecipePrice)}
+        title="Increase quantity"
+        name={slug}
+        disabled={isButtonDisable(selectionLimit, maxRecipesSelected)}>
+        <IconPlusCircle />
+      </SelectionButton>
+    </Flex>
+  );
+};
 
 SelectedRecipeFooter.propTypes = {
   recipeId: PropTypes.string,

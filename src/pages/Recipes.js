@@ -1,5 +1,5 @@
 import React from 'react';
-import RecipesList from '../modules/recipes/RecipesList';
+import RecipesList from '../modules/recipes/RecipesList/RecipesList';
 import { Container } from '../components/Grid';
 import Box from '../components/Box';
 

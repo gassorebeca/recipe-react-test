@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { Row, Col } from '../../components/Grid';
-import Flex from '../../components/Flex';
-import Box from '../../components/Box';
-import RecipeCard from './RecipeCard';
-import PriceInfo from './PriceInfo';
-import { parseRawPrice } from './price';
-import useFetchHelloFreshBox from '../../hooks/useFetchHelloFreshBox';
+import { Row, Col } from '../../../components/Grid';
+import Flex from '../../../components/Flex';
+import Box from '../../../components/Box';
+import RecipeCard from '../RecipeCard/RecipeCard';
+import PriceInfo from '../PriceInfo/PriceInfo';
+import { parseRawPrice } from '../Price/price';
+import useFetchHelloFreshBox from '../../../hooks/useFetchHelloFreshBox';
 
 const Recipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [summary, setSummary] = useState([]);
-  const [selected, setSelected] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [recipesInTheBox, setRecipesInTheBox] = useState(0);
-  const [duplicatedRecipe, setDuplicatedRecipe] = useState(1);
 
   const { data, loading } = useFetchHelloFreshBox();
   const {headline, baseRecipePrice, min, max, shippingPrice} = data;
@@ -21,19 +19,17 @@ const Recipes = () => {
   const maxRecipesSelected = recipesInTheBox === max ? true : false;
   const totalPriceWithShipping = parseRawPrice(recipesInTheBox > 0 ? totalPrice + shippingPrice : 0);
 
-  const handleAddRecipe = (props) => {
-    if(summary.find(p => p.name === props.name)) setDuplicatedRecipe(props.selectedRecipe + 1)
-    else setSummary(summary => [...summary, props] );
+
+  const handleAddRecipe = (newSummaryItem) => {
+    if(newSummaryItem)
+      setSummary(summary => [...summary, newSummaryItem] );
 
     setRecipesInTheBox(recipesInTheBox + 1);
     setTotalPrice(totalPrice + baseRecipePrice)
-    setSelected(selected + 1);
   };
 
-  const handleRemoveRecipe = (name, selectedRecipe) => {
-    if(summary.find(p => p.name === name)) setDuplicatedRecipe(selectedRecipe - 1)
-    else setSummary(summary => summary.splice(name, 1));
-
+  const handleRemoveRecipe = (recipeId) => {
+    setSummary(summary => summary.splice(recipeId, 1));
     setTotalPrice(totalPrice - baseRecipePrice)
     setRecipesInTheBox(recipesInTheBox - 1);
   };
@@ -66,7 +62,7 @@ const Recipes = () => {
               totalPrice={totalPrice}
               shippingPrice={shippingPrice}
               baseRecipePrice={baseRecipePrice}
-              duplicatedRecipe={duplicatedRecipe} />
+            />
           </Flex>
         </Col>
       </Row>
@@ -77,8 +73,9 @@ const Recipes = () => {
             <Box mb="md">
               <RecipeCard
                 {...recipe}
+                baseRecipePrice={baseRecipePrice}
                 selectionLimit={7}
-                selected={selected}
+                selected={0}
                 handleAddRecipe={handleAddRecipe}
                 handleRemoveRecipe={handleRemoveRecipe}
                 minRecipesSelected={minRecipesSelected}
