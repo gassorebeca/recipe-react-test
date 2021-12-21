@@ -20,14 +20,16 @@ const Recipes = () => {
   const totalPriceWithShipping = parseRawPrice(recipesInTheBox > 0 ? totalPrice + shippingPrice : 0);
 
   const handleAddRecipe = (newSummaryItem) => {
-    if(newSummaryItem)
-      setSummary(summary => [...summary, newSummaryItem] );
+    // add a new recipe to the summary box
+    setSummary(summary => [...summary, newSummaryItem] );
 
+    // increase number of recipes in the box and totalPrice
     setRecipesInTheBox(recipesInTheBox + 1);
     setTotalPrice(totalPrice + baseRecipePrice)
   };
 
   const handleUpdateRecipe = (summaryItem) => {
+    // search in summary array for duplicated recipeId and replace it with updated summaryItem name and price
     setSummary(
       summary.map(item =>
         item.recipeId === summaryItem.recipeId
@@ -35,14 +37,17 @@ const Recipes = () => {
           : item
       ))
 
+    // increase number of recipesInTheBox and totalPrice
     setRecipesInTheBox(recipesInTheBox + 1);
     setTotalPrice(totalPrice + baseRecipePrice)
   };
 
   const handleRemoveRecipe = (recipeId) => {
+    // if recipeId is passed, remove the recipe from summary box
     if(recipeId)
       setSummary(summary => summary.splice(recipeId, 1));
 
+    // else remove duplicated recipe price and decrease recipesInTheBox
     setTotalPrice(totalPrice - baseRecipePrice)
     setRecipesInTheBox(recipesInTheBox - 1);
   };
